@@ -1,0 +1,77 @@
+---
+- name: ansible tutorial
+  hosts: all
+  tasks:
+    - name: install packages
+      apt: name={{item}} state=present update_cache=yes
+      become: true
+      with_items:
+        - git
+        - nodejs
+        - npm
+        - libssl-dev
+        - libreadline-dev
+
+    - name: make bin dir
+      file:
+        path: /home/vagrant/bin
+        state: directory
+
+    - name: clone rbenv
+      git:
+        dest: ~/.rbenv
+        repo: https://github.com/sstephenson/rbenv.git
+
+    - name: link rbenv command
+      file:
+        src: ~/.rbenv/bin/rbenv
+        dest: ~/bin/rbenv
+        state: link
+
+    - name: link gem command
+      file:
+        src: ~/.rbenv/shims/gem
+        dest: /home/vagrant/bin/gem
+        state: link
+
+    - name: clone ruby-build
+      git:
+        dest: ~/.rbenv/plugins/ruby-build
+        repo: https://github.com/sstephenson/ruby-build.git
+
+    - name: edit .bashrc
+      blockinfile:
+        path: ~/.bashrc
+        block: |
+          export PATH="$HOME/.rbenv/bin:$PATH"
+          eval "$(rbenv init -)"
+
+    - name: install ruby
+      shell: rbenv install 2.4.1
+      args:
+        creates: .rbenv/versions/2.4.1
+
+    - name: rbenv rehash
+      shell: rbenv rehash
+
+    - name: rbenv global 2.4.1
+      shell: rbenv global 2.4.1
+
+    - name: copy gemrc
+      copy:
+        src: ./.gemrc
+        dest: /home/vagrant/.gemrc
+
+    - name: install gems
+      gem:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - bundler
+        - foreman
+
+    - name: clone circle repo
+      git:
+        repo: https://github.com/hr-js/circle.git
+        dest: ~/workspace/circle
+
