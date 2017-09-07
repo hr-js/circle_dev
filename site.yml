@@ -28,12 +28,6 @@
         dest: ~/bin/rbenv
         state: link
 
-    - name: link gem command
-      file:
-        src: ~/.rbenv/shims/gem
-        dest: /home/vagrant/bin/gem
-        state: link
-
     - name: clone ruby-build
       git:
         dest: ~/.rbenv/plugins/ruby-build
@@ -56,6 +50,12 @@
 
     - name: rbenv global 2.4.1
       shell: rbenv global 2.4.1
+
+    - name: link gem command
+      file:
+        src: ~/.rbenv/shims/gem
+        dest: /home/vagrant/bin/gem
+        state: link
 
     - name: copy gemrc
       copy:
